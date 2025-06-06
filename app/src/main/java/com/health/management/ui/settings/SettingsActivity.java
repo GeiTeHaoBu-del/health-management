@@ -18,7 +18,7 @@ import java.util.Calendar;
 public class SettingsActivity extends AppCompatActivity {
     private TimePicker tpWaterReminder;
     private Button btnSaveWaterReminder;
-    
+
     private SharedPreferences sharedPreferences;
 
     @Override
@@ -34,7 +34,7 @@ public class SettingsActivity extends AppCompatActivity {
     private void initViews() {
         tpWaterReminder = findViewById(R.id.tp_water_reminder);
         btnSaveWaterReminder = findViewById(R.id.btn_save_water_reminder);
-        
+
         sharedPreferences = getSharedPreferences("health_settings", MODE_PRIVATE);
     }
 
@@ -103,4 +103,4 @@ public class SettingsActivity extends AppCompatActivity {
             pendingIntent
         );
     }
-}    
+}

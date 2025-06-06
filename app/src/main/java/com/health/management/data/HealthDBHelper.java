@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class HealthDBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "health_manager.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2; // 版本升级
 
     // ExerciseRecord表创建语句
     public static final String CREATE_EXERCISE_RECORD = 
@@ -26,15 +26,15 @@ public class HealthDBHelper extends SQLiteOpenHelper {
         "calories REAL NOT NULL, " +
         "unit TEXT NOT NULL)";
 
-    // DietRecord表创建语句
-    public static final String CREATE_DIET_RECORD = 
+    // DietRecord表创建语句，修改结构以符合新的需求
+    public static final String CREATE_DIET_RECORD =
         "CREATE TABLE DietRecord (" +
         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+        "date TEXT NOT NULL, " +
+        "food_id INTEGER NOT NULL, " +
         "food_name TEXT NOT NULL, " +
-        "calories REAL NOT NULL, " +
         "amount REAL NOT NULL, " +
-        "unit TEXT NOT NULL, " +
-        "record_time TEXT NOT NULL)";
+        "calories REAL NOT NULL)";
 
     public HealthDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -50,10 +50,11 @@ public class HealthDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS ExerciseRecord");
-        db.execSQL("DROP TABLE IF EXISTS Food");
-        db.execSQL("DROP TABLE IF EXISTS DietRecord");
-        onCreate(db);
+        if (oldVersion < 2) {
+            // 更新 DietRecord 表
+            db.execSQL("DROP TABLE IF EXISTS DietRecord");
+            db.execSQL(CREATE_DIET_RECORD);
+        }
     }
 
     private void initFoodData(SQLiteDatabase db) {
@@ -63,7 +64,12 @@ public class HealthDBHelper extends SQLiteOpenHelper {
             "鸡蛋,70,个",
             "苹果,53,100g",
             "牛肉,106,100g",
-            "西兰花,36,100g"
+            "西兰花,36,100g",
+            "全麦面包,68,片",
+            "牛奶,42,100ml",
+            "香蕉,89,100g",
+            "鸡胸肉,165,100g",
+            "三文鱼,206,100g"
         };
 
         for (String food : foods) {
@@ -73,4 +79,4 @@ public class HealthDBHelper extends SQLiteOpenHelper {
             db.execSQL(insertSql);
         }
     }
-}    
+}
