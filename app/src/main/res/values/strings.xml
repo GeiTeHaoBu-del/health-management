@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">健康管理助手</string>
+    
+    <!-- 运动类型 -->
+    <string-array name="exercise_types">
+        <item>跑步</item>
+        <item>步行</item>
+        <item>骑行</item>
+        <item>游泳</item>
+    </string-array>
+    
+    <!-- 重量单位 -->
+    <string-array name="weight_units">
+        <item>100g</item>
+        <item>个</item>
+        <item>杯</item>
+        <item>碗</item>
+    </string-array>
+</resources>    

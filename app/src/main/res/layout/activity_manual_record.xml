@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="运动历史补录"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="24dp"/>
+
+    <EditText
+        android:id="@+id/et_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="选择日期"
+        android:clickable="true"
+        android:focusable="false"
+        android:padding="10dp"
+        android:layout_marginBottom="16dp"/>
+
+    <Spinner
+        android:id="@+id/sp_exercise_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/et_duration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="运动时长（分钟）"
+        android:inputType="number"
+        android:padding="10dp"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/et_distance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="运动距离（公里）"
+        android:inputType="numberDecimal"
+        android:padding="10dp"
+        android:layout_marginBottom="24dp"/>
+
+    <Button
+        android:id="@+id/btn_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="保存记录"
+        android:background="@color/primary_color"
+        android:textColor="#FFFFFF"
+        android:padding="12dp"
+        android:textSize="18sp"/>
+</LinearLayout>    
