@@ -146,4 +146,4 @@ public class ExerciseRecordDao {
         public double getTotalCalories() { return totalCalories; }
         public void setTotalCalories(double totalCalories) { this.totalCalories = totalCalories; }
     }
-}    
+}
