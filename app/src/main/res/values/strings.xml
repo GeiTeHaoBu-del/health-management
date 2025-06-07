@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">健康管理助手</string>
+    <string name="app_name">全民健康管理</string>
     
-    <!-- 运动类型 -->
+    <!-- 运动类型 无氧训练即健身 -->
     <string-array name="exercise_types">
+        <item>徒步行走</item>
+        <item>无氧训练</item>
         <item>跑步</item>
-        <item>步行</item>
         <item>骑行</item>
         <item>游泳</item>
+        <item>其他</item>
     </string-array>
     
     <!-- 重量单位 -->

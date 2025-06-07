@@ -68,7 +68,8 @@ public class ExerciseActivity extends AppCompatActivity {
 
     private void setupExerciseTypeSpinner() {
         // 设置运动类型下拉菜单选项
-        String[] exerciseTypes = {"跑步", "步行", "骑行", "游泳", "健身"};
+        //String[] exerciseTypes = {"跑步", "步行", "骑行", "游泳", "健身"};
+        String[] exerciseTypes = getResources().getStringArray(R.array.exercise_types);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
             this, android.R.layout.simple_spinner_item, exerciseTypes);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

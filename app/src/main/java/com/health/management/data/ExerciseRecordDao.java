@@ -4,6 +4,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,11 +22,11 @@ public class ExerciseRecordDao {
         ContentValues values = new ContentValues();
         values.put("date", date);
         values.put("type", type);
-        values.put("duration", duration);
+        values.put("duration", duration);//时间
         values.put("distance", distance);
         
         // 计算卡路里
-        double calories = calculateCalories(type, distance);
+        double calories = calculateCalories(type, distance, duration);
         values.put("calories", calories);
 
         long id = db.insert("ExerciseRecord", null, values);
@@ -31,13 +34,24 @@ public class ExerciseRecordDao {
         return id;
     }
 
-    private double calculateCalories(String type, double distance) {
-        if ("跑步".equals(type)) {
+    //计算运动卡路里
+    private double calculateCalories(String type, double distance, double duration) {
+        if ("徒步行走".equals(type)) {
+            return distance * 10;
+        } else if ("无氧训练".equals(type)) {
+            return duration * 20;
+        } else if ("跑步".equals(type)) {
+            return distance * 50;
+        } else if ("骑行".equals(type)) {
             return distance * 60;
-        } else if ("步行".equals(type)) {
-            return distance * 30;
+        } else if ("游泳".equals(type)) {
+            return duration * 40;
+        } else if ("其他".equals(type)) {
+            return duration > distance ? duration * 30 : distance * 30;
         }
         return 0;
+        //第一次只给跑步跟步行设置了卡路里，导致其他的都return 0
+        //同时，第一次只根据距离进行计算，无法衡量原地运动的卡路里
     }
 
     public List<ExerciseRecord> getRecentRecords(int limit) {
@@ -114,6 +128,7 @@ public class ExerciseRecordDao {
         public double getCalories() { return calories; }
         public void setCalories(double calories) { this.calories = calories; }
 
+        @NonNull
         @Override
         public String toString() {
             return date + " - " + type + " (" + duration + "分钟, " + 

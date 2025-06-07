@@ -119,7 +119,6 @@ public class FoodDao {
     public List<Food> getAllCommonFoods() {
         List<Food> foods = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-
         String[] columns = {"id", "name", "calories", "unit"};
         String orderBy = "name ASC"; // 按名称排序
 
@@ -136,7 +135,6 @@ public class FoodDao {
 
         cursor.close();
         db.close();
-
         // 如果数据库中没有食物，添加几种默认食物
         if (foods.isEmpty()) {
             addDefaultFoods();
@@ -155,20 +153,17 @@ public class FoodDao {
 
         String[] defaultFoods = {
             "米饭,130,100g",
-            "鸡蛋,70,个",
-            "苹果,53,100g",
+            "面条,120,100g",
+            "鸡肉,53,100g",
             "牛肉,106,100g",
-            "西兰花,36,100g",
-            "全麦面包,68,片",
+            "猪肉,62,100g",
+            "鸡蛋,68,100g",
             "牛奶,42,100ml",
-            "香蕉,89,100g",
-            "鸡胸肉,165,100g",
-            "三文鱼,206,100g",
-            "蔬菜沙拉,30,100g",
-            "西红柿,18,100g",
-            "豆腐,76,100g",
-            "燕麦片,68,100g",
-            "橙子,47,100g"
+            "水果,89,100g",
+            "海鲜,165,100g",
+            "蔬菜,30,100g",
+            "面包,60,100g",
+            "其他,18,100g"
         };
 
         for (String food : defaultFoods) {
