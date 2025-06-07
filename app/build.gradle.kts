@@ -40,4 +40,18 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    // 添加Retrofit和OkHttp依赖
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp)
+
+    // 添加GSON依赖
+    implementation(libs.gson)
+
+    // 添加位置服务依赖
+    implementation(libs.play.services.location)
+
+    // 添加汉字转拼音依赖
+    implementation(libs.pinyin4j)
 }
