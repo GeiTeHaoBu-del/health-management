@@ -22,13 +22,11 @@
         </activity>
         <activity android:name=".ui.ManualRecordActivity" />
         <activity android:name=".ui.DietActivity" />
+        <activity android:name=".ui.ExerciseActivity" />
         <activity android:name=".ui.settings.SettingsActivity" />
         <receiver android:name=".receiver.ReminderReceiver" />
     </application>
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.SET_ALARM" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>
-
-
-
-

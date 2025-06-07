@@ -1,5 +1,6 @@
 package com.health.management.receiver;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -7,8 +8,10 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import com.health.management.R;
 import com.health.management.ui.MainActivity;
 
@@ -27,7 +30,16 @@ public class ReminderReceiver extends BroadcastReceiver {
     }
 
     private void showNotification(Context context, String message) {
-        NotificationManager notificationManager = 
+        // 检查通知权限
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // 如果没有权限，则不显示通知
+                return;
+            }
+        }
+
+        NotificationManager notificationManager =
             (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         
         // 创建通知渠道（适用于Android 8.0及以上）
@@ -62,4 +74,4 @@ public class ReminderReceiver extends BroadcastReceiver {
         Notification notification = builder.build();
         notificationManager.notify(NOTIFICATION_ID, notification);
     }
-}    
+}
