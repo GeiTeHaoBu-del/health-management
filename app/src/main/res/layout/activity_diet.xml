@@ -1,42 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="饮食打卡"
-        android:textSize="24sp"
+        android:text="添加饮食记录"
+        android:textSize="20sp"
         android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="24dp"/>
-
-    <EditText
-        android:id="@+id/et_food_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="输入食材名称"
-        android:padding="10dp"
-        android:layout_marginBottom="16dp"/>
-
-    <Button
-        android:id="@+id/btn_search"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="搜索食材"
-        android:background="@color/primary_color"
-        android:textColor="#FFFFFF"
-        android:padding="10dp"
-        android:layout_marginBottom="16dp"/>
-
-    <Spinner
-        android:id="@+id/sp_food_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
         android:layout_marginBottom="16dp"/>
 
     <LinearLayout
@@ -45,38 +21,68 @@
         android:orientation="horizontal"
         android:layout_marginBottom="16dp">
 
-        <EditText
-            android:id="@+id/et_amount"
-            android:layout_width="0dp"
+        <TextView
+            android:layout_width="80dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="数量"
-            android:inputType="numberDecimal"
-            android:padding="10dp"/>
+            android:text="食材："
+            android:gravity="center_vertical"/>
 
         <Spinner
-            android:id="@+id/sp_unit"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:padding="10dp"/>
+            android:id="@+id/sp_food_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/tv_result"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:padding="10dp"
-        android:layout_marginBottom="24dp"/>
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:text="数量："
+            android:gravity="center_vertical"/>
+
+        <EditText
+            android:id="@+id/et_amount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:hint="输入食用量" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/btn_save"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="保存记录"
-        android:background="@color/primary_color"
-        android:textColor="#FFFFFF"
-        android:padding="12dp"
-        android:textSize="18sp"/>
-</LinearLayout>    
+        android:backgroundTint="@color/primary_color"
+        android:layout_marginBottom="24dp"/>
+
+    <TextView
+        android:id="@+id/tv_daily_calories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#F5F5F5"
+        android:padding="8dp"
+        android:textSize="16sp"
+        android:text="今日摄入：0.0 卡路里"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="最近饮食记录"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_diet_records"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>
