@@ -48,6 +48,10 @@ public class HomeFragment extends Fragment {
     // 定义权限请求
     private ActivityResultLauncher<String[]> locationPermissionRequest;
 
+    // 保存天气数据，避免每次切换页面重新获取
+    private WeatherData cachedWeatherData = null;
+    private boolean isLoadingWeather = false;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -73,8 +77,12 @@ public class HomeFragment extends Fragment {
         loadStatistics();
         loadDietStatistics();
 
-        // 加载天气信息
-        loadWeatherInfo();
+        // 加载天气信息，但如果已有缓存数据且不是首次加载就不重新请求
+        if (cachedWeatherData != null) {
+            displayWeatherInfo(cachedWeatherData);
+        } else if (!isLoadingWeather) {
+            loadWeatherInfo();
+        }
     }
 
     private void initViews(View view) {
@@ -125,6 +133,9 @@ public class HomeFragment extends Fragment {
                 } else {
                     getCityWeather(cityName);
                 }
+                // 清除缓存数据，因为用户主动搜索了新城市
+                cachedWeatherData = null;
+                isLoadingWeather = true;
             } else {
                 Toast.makeText(requireContext(), "请输入城市名称", Toast.LENGTH_SHORT).show();
             }
@@ -134,6 +145,7 @@ public class HomeFragment extends Fragment {
     private void loadWeatherInfo() {
         // 检查位置权限
         if (checkLocationPermission()) {
+            isLoadingWeather = true;
             getCurrentLocationWeather();
         } else {
             // 请求位置权限
@@ -162,14 +174,27 @@ public class HomeFragment extends Fragment {
         weatherManager.getCurrentLocationWeather(new WeatherManager.WeatherCallback() {
             @Override
             public void onWeatherDataReceived(WeatherData weatherData) {
+                cachedWeatherData = weatherData;  // 保存数据到缓存
+                isLoadingWeather = false;
                 displayWeatherInfo(weatherData);
             }
 
             @Override
             public void onError(String message) {
+                isLoadingWeather = false;
                 requireActivity().runOnUiThread(() -> {
-                    tvWeatherInfo.setText("获取天气信息失败: " + message);
+                    tvWeatherInfo.setText("无法获取您当前位置的天气信息，请手动输入城市名称");
                     tvExerciseSuggestion.setText("无法提供运动建议");
+
+                    // 突出显示城市输入框，引导用户注意
+                    etCityName.setHint("请输入您所在的城市");
+                    etCityName.setBackgroundResource(android.R.drawable.edit_text);
+                    etCityName.requestFocus();
+
+                    // 显示简短的Toast消息
+                    Toast.makeText(requireContext(),
+                        "无法自动获取位置，请手动输入城市",
+                        Toast.LENGTH_LONG).show();
                 });
             }
         });
@@ -182,14 +207,28 @@ public class HomeFragment extends Fragment {
         weatherManager.getWeatherByCity(cityName, new WeatherManager.WeatherCallback() {
             @Override
             public void onWeatherDataReceived(WeatherData weatherData) {
+                cachedWeatherData = weatherData;  // 保存数据到缓存
+                isLoadingWeather = false;
                 displayWeatherInfo(weatherData);
             }
 
             @Override
             public void onError(String message) {
+                isLoadingWeather = false;
                 requireActivity().runOnUiThread(() -> {
-                    tvWeatherInfo.setText("获取天气信息失败: " + message);
+                    String cityName = etCityName.getText().toString().trim();
+                    tvWeatherInfo.setText("无法获取 \"" + cityName + "\" 的天气信息，请确认城市名称是否正确");
                     tvExerciseSuggestion.setText("无法提供运动建议");
+
+                    // 突出显示城市输入框，引导用户重新输入
+                    etCityName.setHint("请输入正确的城市名称");
+                    etCityName.setBackgroundResource(android.R.drawable.edit_text);
+                    etCityName.requestFocus();
+
+                    // 显示帮助提示
+                    Toast.makeText(requireContext(),
+                        "城市名称可能拼写错误或不受支持，请尝试其他城市",
+                        Toast.LENGTH_LONG).show();
                 });
             }
         });
