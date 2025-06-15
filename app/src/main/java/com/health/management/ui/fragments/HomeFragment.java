@@ -1,6 +1,7 @@
 package com.health.management.ui.fragments;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -16,16 +17,16 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.health.management.R;
+import com.health.management.data.DietDao;
 import com.health.management.data.ExerciseRecordDao;
 import com.health.management.data.FoodDao;
 import com.health.management.data.weather.WeatherData;
 import com.health.management.data.weather.WeatherManager;
-import com.health.management.ui.DietActivity;
+import com.health.management.ui.settings.SettingsActivity;
 import com.health.management.utils.PinyinUtils;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -56,7 +57,14 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
-        
+        FloatingActionButton fabSettings = view.findViewById(R.id.fab_settings);
+        fabSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
         initViews(view);
         exerciseRecordDao = new ExerciseRecordDao(requireContext());
         foodDao = new FoodDao(requireContext());
@@ -183,7 +191,7 @@ public class HomeFragment extends Fragment {
             public void onError(String message) {
                 isLoadingWeather = false;
                 requireActivity().runOnUiThread(() -> {
-                    tvWeatherInfo.setText("无法获取您当前位置的天气信息，请手动输入城市名称");
+                    tvWeatherInfo.setText("无法获取您当前的位置信息，请手动输入城市名称");
                     tvExerciseSuggestion.setText("无法提供运动建议");
 
                     // 突出显示城市输入框，引导用户注意
@@ -294,13 +302,13 @@ public class HomeFragment extends Fragment {
         tvDietStatistics.setText(dietStatsText);
 
         // 加载最近饮食记录
-        List<DietActivity.DietRecord> dietRecords = foodDao.getRecentDietRecords(3);
+        List<DietDao> dietRecords = foodDao.getRecentDietRecords(3);
         StringBuilder dietRecordsText = new StringBuilder();
 
         if (dietRecords.isEmpty()) {
             dietRecordsText.append("暂无饮食记录");
         } else {
-            for (DietActivity.DietRecord record : dietRecords) {
+            for (DietDao record : dietRecords) {
                 dietRecordsText.append("- ")
                     .append(record.getDate())
                     .append(": ")

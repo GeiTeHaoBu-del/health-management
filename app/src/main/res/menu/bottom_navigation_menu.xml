@@ -16,8 +16,5 @@
         android:id="@+id/menu_diet"
         android:icon="@drawable/ic_diet"
         android:title="饮食" />
-    <item
-        android:id="@+id/menu_settings"
-        android:icon="@drawable/ic_settings"
-        android:title="设置" />
 </menu>
+    <!--底部导航栏-->

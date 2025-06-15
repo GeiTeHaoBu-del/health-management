@@ -15,6 +15,8 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.health.management.R;
+import com.health.management.ui.fragments.DietFragment;
+import com.health.management.ui.fragments.ExerciseFragment;
 import com.health.management.ui.fragments.HomeFragment;
 import com.health.management.ui.fragments.RecordFragment;
 import com.health.management.ui.settings.SettingsActivity;
@@ -26,13 +28,15 @@ public class MainActivity extends AppCompatActivity {
     // 保存Fragment实例，避免重复创建
     private HomeFragment homeFragment;
     private RecordFragment recordFragment;
+    private ExerciseFragment exerciseFragment;
+    private DietFragment dietFragment;
     private Fragment activeFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
+
         initViews();
         setupBottomNavigation();
 
@@ -40,14 +44,20 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             homeFragment = new HomeFragment();
             recordFragment = new RecordFragment();
+            exerciseFragment = new ExerciseFragment();
+            dietFragment = new DietFragment();
 
             // 加载初始Fragment（主页）
             getSupportFragmentManager()
-                .beginTransaction()
-                .add(R.id.fragment_container, recordFragment, "record")
-                .hide(recordFragment)
-                .add(R.id.fragment_container, homeFragment, "home")
-                .commit();
+                    .beginTransaction()
+                    .add(R.id.fragment_container, recordFragment, "record")
+                    .hide(recordFragment)
+                    .add(R.id.fragment_container, exerciseFragment, "exercise")
+                    .hide(exerciseFragment)
+                    .add(R.id.fragment_container, dietFragment, "diet")
+                    .hide(dietFragment)
+                    .add(R.id.fragment_container, homeFragment, "home")
+                    .commit();
 
             activeFragment = homeFragment;
         }
@@ -61,36 +71,41 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupBottomNavigation() {
         bottomNavigationView.setOnNavigationItemSelectedListener(
-            new BottomNavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                    if (item.getItemId() == R.id.menu_home) {
-                        // 切换到主页Fragment
-                        if (homeFragment == null) {
-                            homeFragment = new HomeFragment();
+                new BottomNavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        if (item.getItemId() == R.id.menu_home) {
+                            // 切换到主页Fragment
+                            if (homeFragment == null) {
+                                homeFragment = new HomeFragment();
+                            }
+                            loadFragment(homeFragment);
+                            return true;
+                        } else if (item.getItemId() == R.id.menu_record) {
+                            // 切换到记录Fragment
+                            if (recordFragment == null) {
+                                recordFragment = new RecordFragment();
+                            }
+                            loadFragment(recordFragment);
+                            return true;
+                        } else if (item.getItemId() == R.id.menu_exercise) {
+                            // 切换到运动Fragment
+                            if (exerciseFragment == null) {
+                                exerciseFragment = new ExerciseFragment();
+                            }
+                            loadFragment(exerciseFragment);
+                            return true;
+                        } else if (item.getItemId() == R.id.menu_diet) {
+                            // 切换到饮食Fragment
+                            if (dietFragment == null) {
+                                dietFragment = new DietFragment();
+                            }
+                            loadFragment(dietFragment);
+                            return true;
                         }
-                        loadFragment(homeFragment);
-                        return true;
-                    } else if (item.getItemId() == R.id.menu_record) {
-                        // 切换到记录Fragment
-                        if (recordFragment == null) {
-                            recordFragment = new RecordFragment();
-                        }
-                        loadFragment(recordFragment);
-                        return true;
-                    } else if (item.getItemId() == R.id.menu_exercise) {
-                        startActivity(new Intent(MainActivity.this, ExerciseActivity.class));
-                        return true;
-                    } else if (item.getItemId() == R.id.menu_diet) {
-                        startActivity(new Intent(MainActivity.this, DietActivity.class));
-                        return true;
-                    } else if (item.getItemId() == R.id.menu_settings) {
-                        startActivity(new Intent(MainActivity.this, SettingsActivity.class));
-                        return true;
+                        return false;
                     }
-                    return false;
                 }
-            }
         );
     }
 
@@ -102,10 +117,10 @@ public class MainActivity extends AppCompatActivity {
 
         // 隐藏当前显示的Fragment，显示需要切换的Fragment
         getSupportFragmentManager()
-            .beginTransaction()
-            .hide(activeFragment)
-            .show(fragment)
-            .commit();
+                .beginTransaction()
+                .hide(activeFragment)
+                .show(fragment)
+                .commit();
 
         // 更新当前活动的Fragment引用
         activeFragment = fragment;
@@ -113,14 +128,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupNotificationPermission() {
         requestPermissionLauncher = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(),
-            isGranted -> {
-                if (isGranted) {
-                    // 权限已授予
-                } else {
-                    Toast.makeText(this, "通知权限被拒绝，部分功能可能无法正常使用", Toast.LENGTH_LONG).show();
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        // 权限已授予
+                    } else {
+                        Toast.makeText(this, "通知权限被拒绝，部分功能可能无法正常使用", Toast.LENGTH_LONG).show();
+                    }
                 }
-            }
         );
 
         // Android 13及以上版本需要请求通知权限

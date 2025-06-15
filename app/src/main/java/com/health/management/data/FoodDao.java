@@ -10,8 +10,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import com.health.management.ui.DietActivity;
-
 public class FoodDao {
     private HealthDBHelper dbHelper;
 
@@ -63,8 +61,8 @@ public class FoodDao {
     /**
      * 获取最近的饮食记录列表
      */
-    public List<DietActivity.DietRecord> getRecentDietRecords(int limit) {
-        List<DietActivity.DietRecord> records = new ArrayList<>();
+    public List<DietDao> getRecentDietRecords(int limit) {
+        List<DietDao> records = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         String[] columns = {"id", "date", "food_name", "amount", "calories"};
@@ -74,7 +72,7 @@ public class FoodDao {
         Cursor cursor = db.query("DietRecord", columns, null, null, null, null, orderBy, limitStr);
 
         while (cursor.moveToNext()) {
-            DietActivity.DietRecord record = new DietActivity.DietRecord();
+            DietDao record = new DietDao();
             record.setId(cursor.getInt(0));
             record.setDate(cursor.getString(1));
             record.setFoodName(cursor.getString(2));

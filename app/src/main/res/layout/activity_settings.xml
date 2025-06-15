@@ -5,36 +5,42 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- 返回按钮 -->
+    <ImageButton
+        android:id="@+id/btn_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_revert"
+        android:background="@android:color/transparent"
+        android:layout_marginBottom="16dp"/>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="健康提醒设置"
+        android:text="喝水打卡"
         android:textSize="24sp"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="24dp"/>
 
     <TextView
+        android:id="@+id/tv_drinking_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="喝水提醒时间"
+        android:text="今日已喝水 0 次，目标 7 次，每次 200ml"
         android:textSize="18sp"
-        android:padding="10dp"
-        android:layout_marginBottom="16dp"/>
-
-    <TimePicker
-        android:id="@+id/tp_water_reminder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:layout_marginBottom="24dp"/>
 
     <Button
-        android:id="@+id/btn_save_water_reminder"
+        android:id="@+id/btn_drink_water"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="保存设置"
+        android:text="喝水打卡"
         android:background="@color/primary_color"
         android:textColor="#FFFFFF"
         android:padding="12dp"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        android:layout_marginBottom="24dp"/>
+
 </LinearLayout>
