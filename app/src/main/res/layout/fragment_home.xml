@@ -18,7 +18,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="健康数据看板"
+                android:text="健康管理数据"
                 android:textSize="24sp"
                 android:textStyle="bold"
                 android:layout_gravity="center_horizontal"
@@ -83,6 +83,14 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/tv_remaining_water"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="今日还需喝水 0 次"
+                android:padding="16dp"
+                android:textSize="18sp"/>
+
+            <TextView
                 android:id="@+id/tv_statistics"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -91,7 +99,6 @@
                 android:background="#f0f0f0"
                 android:layout_marginBottom="24dp"/>
 
-            <!-- 其余布局保持不变 -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

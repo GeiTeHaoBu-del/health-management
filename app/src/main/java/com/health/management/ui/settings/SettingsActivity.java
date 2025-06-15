@@ -14,6 +14,7 @@ import com.health.management.R;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import android.util.Log;
 
 public class SettingsActivity extends AppCompatActivity {
     private ImageButton btnBack;
@@ -43,11 +44,12 @@ public class SettingsActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences("health_settings", MODE_PRIVATE);
     }
 
+    //intent传递
     private void setupBackButton() {
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                finishWithResult();
             }
         });
     }
@@ -62,11 +64,23 @@ public class SettingsActivity extends AppCompatActivity {
                     saveTodayDrinkingCount(currentCount);
                     updateDrinkingInfo(currentCount);
                     Toast.makeText(SettingsActivity.this, "打卡成功！", Toast.LENGTH_SHORT).show();
+                    // 更新返回结果
+                    finishWithResult();
                 } else {
                     Toast.makeText(SettingsActivity.this, "今日目标已完成！", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+    }
+
+    private void finishWithResult() {
+        int currentCount = getTodayDrinkingCount();
+        int remainingCount = DAILY_GOAL - currentCount;
+        Log.d("SettingsActivity", "Current count: " + currentCount + ", Remaining count: " + remainingCount);
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("remaining_count", remainingCount);
+        setResult(RESULT_OK, resultIntent);
+        finish();
     }
 
     private String getTodayDate() {

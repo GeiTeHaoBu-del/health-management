@@ -6,7 +6,10 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -20,34 +23,56 @@ import com.health.management.ui.fragments.ExerciseFragment;
 import com.health.management.ui.fragments.HomeFragment;
 import com.health.management.ui.fragments.RecordFragment;
 import com.health.management.ui.settings.SettingsActivity;
+import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
-    private BottomNavigationView bottomNavigationView;
-    private ActivityResultLauncher<String> requestPermissionLauncher;
+    private BottomNavigationView bottomNavigationView; // 底部导航栏视图
+    private ActivityResultLauncher<String> requestPermissionLauncher; // 用于请求用户权限的工具
 
     // 保存Fragment实例，避免重复创建
-    private HomeFragment homeFragment;
-    private RecordFragment recordFragment;
-    private ExerciseFragment exerciseFragment;
-    private DietFragment dietFragment;
-    private Fragment activeFragment;
+    private HomeFragment homeFragment; // 主页
+    private RecordFragment recordFragment; // 记录查看
+    private ExerciseFragment exerciseFragment; // 添加锻炼记录
+    private DietFragment dietFragment; // 添加饮食记录
+    private Fragment activeFragment; // 当前正在显示的页面
+
+    // 设置Activity启动器，用于接收返回的喝水数据
+    private ActivityResultLauncher<Intent> settingsActivityLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == RESULT_OK) {
+                        Intent data = result.getData();
+                        if (data != null) {
+                            int remainingCount = data.getIntExtra("remaining_count", 0);
+                            Log.d("MainActivity", "Received remaining count: " + remainingCount);
+
+                            // 获取HomeFragment实例并更新数据
+                            if (homeFragment != null && homeFragment.isAdded()) {
+                                homeFragment.updateRemainingWater(remainingCount);
+                            }
+                        }
+                    }
+                }
+            });
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) { // 页面初始化方法
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main); // 使用此布局
 
-        initViews();
-        setupBottomNavigation();
+        initViews(); // 初始化页面元素的方法
+        setupBottomNavigation(); // 初始化底部导航栏的方法
 
-        // 初始化Fragment
+        // 初始化四个Fragment
         if (savedInstanceState == null) {
             homeFragment = new HomeFragment();
             recordFragment = new RecordFragment();
             exerciseFragment = new ExerciseFragment();
             dietFragment = new DietFragment();
 
-            // 加载初始Fragment（主页）
+            // 加载所有的fragment，但是把主页之外的隐藏起来，这样每次看别的页面就可以快速切换
             getSupportFragmentManager()
                     .beginTransaction()
                     .add(R.id.fragment_container, recordFragment, "record")
@@ -57,11 +82,20 @@ public class MainActivity extends AppCompatActivity {
                     .add(R.id.fragment_container, dietFragment, "diet")
                     .hide(dietFragment)
                     .add(R.id.fragment_container, homeFragment, "home")
-                    .commit();
+                    .commit(); // 先只显示主页
 
+            // 当前fragment设置为主页
             activeFragment = homeFragment;
+        } else {
+            // 从保存的状态中恢复fragment实例
+            homeFragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag("home");
+            recordFragment = (RecordFragment) getSupportFragmentManager().findFragmentByTag("record");
+            exerciseFragment = (ExerciseFragment) getSupportFragmentManager().findFragmentByTag("exercise");
+            dietFragment = (DietFragment) getSupportFragmentManager().findFragmentByTag("diet");
+            activeFragment = getSupportFragmentManager().getPrimaryNavigationFragment();
         }
 
+        // 设置通知权限
         setupNotificationPermission();
     }
 
@@ -110,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadFragment(Fragment fragment) {
-        // 避免切换到当前已经显示的Fragment
+        // 已经是目标页面了就不加载
         if (fragment == activeFragment) {
             return;
         }
@@ -120,12 +154,14 @@ public class MainActivity extends AppCompatActivity {
                 .beginTransaction()
                 .hide(activeFragment)
                 .show(fragment)
+                .setPrimaryNavigationFragment(fragment)
                 .commit();
 
         // 更新当前活动的Fragment引用
         activeFragment = fragment;
     }
 
+    // 判断通知权限
     private void setupNotificationPermission() {
         requestPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
@@ -146,5 +182,11 @@ public class MainActivity extends AppCompatActivity {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
             }
         }
+    }
+
+    // 打开设置Activity的方法（需要在合适的地方调用，如点击设置按钮）
+    public void openSettingsActivity() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        settingsActivityLauncher.launch(intent);
     }
 }

@@ -1,6 +1,7 @@
 package com.health.management.ui.fragments;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -11,12 +12,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.health.management.R;
 import com.health.management.data.DietDao;
@@ -24,17 +23,20 @@ import com.health.management.data.ExerciseRecordDao;
 import com.health.management.data.FoodDao;
 import com.health.management.data.weather.WeatherData;
 import com.health.management.data.weather.WeatherManager;
+import com.health.management.ui.MainActivity;
 import com.health.management.ui.settings.SettingsActivity;
 import com.health.management.utils.PinyinUtils;
-
 import java.util.List;
 import java.util.Locale;
+import android.util.Log;
 
 public class HomeFragment extends Fragment {
+    //文本视图
     private TextView tvStatistics;
     private TextView tvRecentRecords;
     private TextView tvDietStatistics;
     private TextView tvRecentDietRecords;
+    private TextView tvRemainingWater;
 
     // 天气相关UI组件
     private TextView tvWeatherInfo;
@@ -42,6 +44,7 @@ public class HomeFragment extends Fragment {
     private EditText etCityName;
     private Button btnSearchCity;
 
+    //数据访问对象和管理工具
     private ExerciseRecordDao exerciseRecordDao;
     private FoodDao foodDao;
     private WeatherManager weatherManager;
@@ -57,14 +60,22 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+
+        //绑定喝水按钮
         FloatingActionButton fabSettings = view.findViewById(R.id.fab_settings);
         fabSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), SettingsActivity.class);
-                startActivity(intent);
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).openSettingsActivity();
+                } else {
+                    Intent intent = new Intent(getActivity(), SettingsActivity.class);
+                    startActivity(intent);
+                }
             }
         });
+
+        //初始化视图和数据
         initViews(view);
         exerciseRecordDao = new ExerciseRecordDao(requireContext());
         foodDao = new FoodDao(requireContext());
@@ -79,11 +90,13 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
+    //页面可见时刷新数据
     @Override
     public void onResume() {
         super.onResume();
-        loadStatistics();
-        loadDietStatistics();
+        loadStatistics();//运动数据
+        loadDietStatistics();//饮食数据
+        updateWaterCountFromPreferences();
 
         // 加载天气信息，但如果已有缓存数据且不是首次加载就不重新请求
         if (cachedWeatherData != null) {
@@ -93,7 +106,9 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    //初始化UI组件
     private void initViews(View view) {
+        tvRemainingWater = view.findViewById(R.id.tv_remaining_water);
         tvStatistics = view.findViewById(R.id.tv_statistics);
         tvRecentRecords = view.findViewById(R.id.tv_recent_records);
         tvDietStatistics = view.findViewById(R.id.tv_diet_statistics);
@@ -106,26 +121,54 @@ public class HomeFragment extends Fragment {
         btnSearchCity = view.findViewById(R.id.btn_search_city);
     }
 
+    //从偏好设置中更新喝水次数
+    private void updateWaterCountFromPreferences() {
+        if (tvRemainingWater == null) return;
+
+        int DAILY_GOAL = 7;
+        int currentCount = requireContext().getSharedPreferences("health_settings", Context.MODE_PRIVATE)
+                .getInt(getTodayDate(), 0);
+        int remainingCount = DAILY_GOAL - currentCount;
+
+        Log.d("HomeFragment", "Updating remaining water count from preferences: " + remainingCount);
+        tvRemainingWater.setText("今日还需喝水 " + remainingCount + " 次");
+    }
+
+    private String getTodayDate() {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        return sdf.format(new java.util.Date());
+    }
+
+    //位置权限相关
     private void registerLocationPermissionRequest() {
         locationPermissionRequest = registerForActivityResult(
-            new ActivityResultContracts.RequestMultiplePermissions(),
-            result -> {
-                Boolean fineLocationGranted = result.getOrDefault(
-                    Manifest.permission.ACCESS_FINE_LOCATION, false);
-                Boolean coarseLocationGranted = result.getOrDefault(
-                    Manifest.permission.ACCESS_COARSE_LOCATION, false);
+                new ActivityResultContracts.RequestMultiplePermissions(),
+                result -> {
+                    Boolean fineLocationGranted = result.getOrDefault(
+                            Manifest.permission.ACCESS_FINE_LOCATION, false);
+                    Boolean coarseLocationGranted = result.getOrDefault(
+                            Manifest.permission.ACCESS_COARSE_LOCATION, false);
 
-                if (fineLocationGranted != null && fineLocationGranted ||
-                    coarseLocationGranted != null && coarseLocationGranted) {
-                    // 位置权限已授予，获取天气信息
-                    getCurrentLocationWeather();
-                } else {
-                    Toast.makeText(requireContext(), "需要位置权限才能获取当前位置天气", Toast.LENGTH_LONG).show();
+                    if (fineLocationGranted != null && fineLocationGranted ||
+                            coarseLocationGranted != null && coarseLocationGranted) {
+                        // 位置权限已授予，获取天气信息
+                        getCurrentLocationWeather();
+                    } else {
+                        Toast.makeText(requireContext(), "需要位置权限才能获取当前位置天气", Toast.LENGTH_LONG).show();
+                    }
                 }
-            }
         );
     }
 
+    // 更新剩余喝水次数的公共方法
+    public void updateRemainingWater(int count) {
+        if (tvRemainingWater != null) {
+            Log.d("HomeFragment", "Updating remaining water count: " + count);
+            tvRemainingWater.setText("今日还需喝水 " + count + " 次");
+        }
+    }
+
+    //城市搜索
     private void setupCitySearchButton() {
         btnSearchCity.setOnClickListener(v -> {
             String cityName = etCityName.getText().toString().trim();
@@ -135,8 +178,8 @@ public class HomeFragment extends Fragment {
                     String pinyinCity = PinyinUtils.toPinyin(cityName);
                     // 显示正在查询的信息，包含原始输入和转换后的拼音
                     Toast.makeText(requireContext(),
-                        "正在查询: " + cityName + " (" + pinyinCity + ")",
-                        Toast.LENGTH_SHORT).show();
+                            "正在查询: " + cityName + " (" + pinyinCity + ")",
+                            Toast.LENGTH_SHORT).show();
                     getCityWeather(pinyinCity);
                 } else {
                     getCityWeather(cityName);
@@ -150,6 +193,7 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    //天气加载显示
     private void loadWeatherInfo() {
         // 检查位置权限
         if (checkLocationPermission()) {
@@ -164,14 +208,14 @@ public class HomeFragment extends Fragment {
     private boolean checkLocationPermission() {
         return ContextCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-               ContextCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+                ContextCompat.checkSelfPermission(requireContext(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     private void requestLocationPermission() {
         locationPermissionRequest.launch(new String[] {
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
         });
     }
 
@@ -201,8 +245,8 @@ public class HomeFragment extends Fragment {
 
                     // 显示简短的Toast消息
                     Toast.makeText(requireContext(),
-                        "无法自动获取位置，请手动输入城市",
-                        Toast.LENGTH_LONG).show();
+                            "无法自动获取位置，请手动输入城市",
+                            Toast.LENGTH_LONG).show();
                 });
             }
         });
@@ -235,8 +279,8 @@ public class HomeFragment extends Fragment {
 
                     // 显示帮助提示
                     Toast.makeText(requireContext(),
-                        "城市名称可能拼写错误或不受支持，请尝试其他城市",
-                        Toast.LENGTH_LONG).show();
+                            "城市名称可能拼写错误或不受支持，请尝试其他城市",
+                            Toast.LENGTH_LONG).show();
                 });
             }
         });
@@ -249,12 +293,12 @@ public class HomeFragment extends Fragment {
 
             // 当前天气信息文本
             String weatherInfo = String.format(Locale.getDefault(),
-                "%s: %.1f°C, %s\n湿度: %d%%, 风速: %.1f m/s",
-                weatherData.getCityName(),
-                tempCelsius,
-                weatherData.getWeatherDescription(),
-                weatherData.getHumidity(),
-                weatherData.getWindSpeed());
+                    "%s: %.1f°C, %s\n湿度: %d%%, 风速: %.1f m/s",
+                    weatherData.getCityName(),
+                    tempCelsius,
+                    weatherData.getWeatherDescription(),
+                    weatherData.getHumidity(),
+                    weatherData.getWindSpeed());
 
             tvWeatherInfo.setText(weatherInfo);
 
@@ -271,14 +315,15 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    //加载运动信息
     private void loadStatistics() {
         // 加载统计数据
         ExerciseRecordDao.Statistics stats = exerciseRecordDao.getWeeklyStatistics();
         String statisticsText = "本周运动统计：\n" +
-            "总时长：" + stats.getTotalDuration() + "分钟\n" +
-            "总消耗：" + stats.getTotalCalories() + "卡路里";
+                "总时长：" + stats.getTotalDuration() + "分钟\n" +
+                "总消耗：" + stats.getTotalCalories() + "卡路里";
         tvStatistics.setText(statisticsText);
-        
+
         // 加载最近记录
         List<ExerciseRecordDao.ExerciseRecord> records = exerciseRecordDao.getRecentRecords(3);
         StringBuilder recordsText = new StringBuilder("最近运动记录：\n");
@@ -294,11 +339,12 @@ public class HomeFragment extends Fragment {
         tvRecentRecords.setText(recordsText.toString());
     }
 
+    //加载饮食数据
     private void loadDietStatistics() {
         // 加载今日饮食统计
         double todayCalories = foodDao.getTodayTotalCalories();
         String dietStatsText = "今日饮食摄入：\n" +
-            "总卡路里：" + String.format("%.1f", todayCalories) + " 卡路里";
+                "总卡路里：" + String.format("%.1f", todayCalories) + " 卡路里";
         tvDietStatistics.setText(dietStatsText);
 
         // 加载最近饮食记录
@@ -310,14 +356,14 @@ public class HomeFragment extends Fragment {
         } else {
             for (DietDao record : dietRecords) {
                 dietRecordsText.append("- ")
-                    .append(record.getDate())
-                    .append(": ")
-                    .append(record.getFoodName())
-                    .append(" (")
-                    .append(String.format("%.1f", record.getAmount()))
-                    .append("份, ")
-                    .append(String.format("%.1f", record.getCalories()))
-                    .append("卡路里)\n");
+                        .append(record.getDate())
+                        .append(": ")
+                        .append(record.getFoodName())
+                        .append(" (")
+                        .append(String.format("%.1f", record.getAmount()))
+                        .append("份, ")
+                        .append(String.format("%.1f", record.getCalories()))
+                        .append("卡路里)\n");
             }
         }
 
